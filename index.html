@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS MCQ Master - 1000 Questions Quiz Platform</title>
+    <meta name="description" content="Practice 1000 Computer Science MCQ questions covering Computer Basics, Data Representation, and Computer Architecture.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Landing Screen -->
+        <div id="landing-screen" class="screen active">
+            <div class="landing-container">
+                <div class="hero-badge">🎓 CS MCQ Master</div>
+                <h1 class="hero-title">Computer Science<br><span class="gradient-text">Quiz Platform</span></h1>
+                <p class="hero-subtitle">1000 carefully crafted MCQs covering Computer Basics, Data Representation & Computer Architecture</p>
+                
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-number">1000</div>
+                        <div class="stat-label">Questions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Topics</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">50</div>
+                        <div class="stat-label">Marks</div>
+                    </div>
+                </div>
+
+                <div class="topic-selector">
+                    <h2 class="section-title">Choose Your Quiz Mode</h2>
+                    <div class="mode-cards">
+                        <div class="mode-card" onclick="startQuiz('all')">
+                            <div class="mode-icon">📚</div>
+                            <h3>Full Test</h3>
+                            <p>All 1000 Questions</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('basics')">
+                            <div class="mode-icon">🖥️</div>
+                            <h3>Computer Basics</h3>
+                            <p id="basics-count">0 Questions</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('data')">
+                            <div class="mode-icon">🔢</div>
+                            <h3>Data Representation</h3>
+                            <p id="data-count">0 Questions</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('architecture')">
+                            <div class="mode-icon">⚙️</div>
+                            <h3>Computer Architecture</h3>
+                            <p id="arch-count">0 Questions</p>
+                        </div>
+                    </div>
+                    <div class="quiz-options">
+                        <label class="option-label">
+                            <span>Questions per session:</span>
+                            <select id="question-count-select">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                                <option value="0">All</option>
+                            </select>
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="shuffle-check" checked> Shuffle Questions
+                        </label>
+                        <label class="option-label">
+                            <input type="checkbox" id="timer-check"> Enable Timer (1 min/question)
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="quiz-header-left">
+                    <button class="btn-back" onclick="goHome()">← Home</button>
+                    <span class="quiz-topic-label" id="quiz-topic-label">Full Test</span>
+                </div>
+                <div class="quiz-header-center">
+                    <div class="progress-info">
+                        <span id="current-q">1</span> / <span id="total-q">50</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                </div>
+                <div class="quiz-header-right">
+                    <div class="score-display">
+                        <span class="score-correct" id="score-correct">✓ 0</span>
+                        <span class="score-wrong" id="score-wrong">✗ 0</span>
+                    </div>
+                    <div class="timer-display" id="timer-display" style="display:none;">⏱ <span id="timer-value">60</span>s</div>
+                </div>
+            </div>
+
+            <div class="quiz-body">
+                <div class="question-card" id="question-card">
+                    <div class="question-number" id="question-number">Q1</div>
+                    <div class="question-text" id="question-text">Loading...</div>
+                    <div class="options-list" id="options-list"></div>
+                    <div class="explanation" id="explanation" style="display:none;"></div>
+                </div>
+                <div class="quiz-nav">
+                    <button class="btn nav-btn" id="prev-btn" onclick="prevQuestion()">← Previous</button>
+                    <button class="btn nav-btn" id="skip-btn" onclick="skipQuestion()">Skip →</button>
+                    <button class="btn nav-btn primary" id="next-btn" onclick="nextQuestion()" style="display:none;">Next →</button>
+                    <button class="btn nav-btn finish" id="finish-btn" onclick="finishQuiz()" style="display:none;">Finish Quiz</button>
+                </div>
+            </div>
+
+            <div class="question-palette-toggle" onclick="togglePalette()">📋</div>
+            <div class="question-palette" id="question-palette">
+                <h3>Question Palette</h3>
+                <div class="palette-legend">
+                    <span class="legend-item"><span class="dot answered"></span>Answered</span>
+                    <span class="legend-item"><span class="dot correct"></span>Correct</span>
+                    <span class="legend-item"><span class="dot wrong"></span>Wrong</span>
+                    <span class="legend-item"><span class="dot skipped"></span>Skipped</span>
+                </div>
+                <div class="palette-grid" id="palette-grid"></div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <div class="result-header">
+                    <div class="result-emoji" id="result-emoji">🎉</div>
+                    <h1 class="result-title" id="result-title">Great Job!</h1>
+                    <p class="result-subtitle" id="result-subtitle">You completed the quiz!</p>
+                </div>
+                <div class="result-score-circle">
+                    <svg viewBox="0 0 120 120" class="score-ring">
+                        <circle cx="60" cy="60" r="54" class="ring-bg"/>
+                        <circle cx="60" cy="60" r="54" class="ring-fill" id="score-ring-fill"/>
+                    </svg>
+                    <div class="score-center">
+                        <div class="score-percent" id="score-percent">0%</div>
+                        <div class="score-fraction" id="score-fraction">0/0</div>
+                    </div>
+                </div>
+                <div class="result-stats">
+                    <div class="result-stat correct"><div class="rs-num" id="rs-correct">0</div><div class="rs-label">Correct</div></div>
+                    <div class="result-stat wrong"><div class="rs-num" id="rs-wrong">0</div><div class="rs-label">Wrong</div></div>
+                    <div class="result-stat skipped"><div class="rs-num" id="rs-skipped">0</div><div class="rs-label">Skipped</div></div>
+                </div>
+                <div class="result-topic-breakdown" id="result-topic-breakdown"></div>
+                <div class="result-actions">
+                    <button class="btn primary" onclick="reviewAnswers()">📝 Review Answers</button>
+                    <button class="btn" onclick="retryQuiz()">🔄 Retry Same Quiz</button>
+                    <button class="btn" onclick="goHome()">🏠 Back to Home</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Screen -->
+        <div id="review-screen" class="screen">
+            <div class="review-header">
+                <button class="btn-back" onclick="showScreen('result-screen')">← Back to Results</button>
+                <h2>Answer Review</h2>
+                <div class="review-filter">
+                    <button class="filter-btn active" onclick="filterReview('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterReview('correct', this)">✓ Correct</button>
+                    <button class="filter-btn" onclick="filterReview('wrong', this)">✗ Wrong</button>
+                    <button class="filter-btn" onclick="filterReview('skipped', this)">⊘ Skipped</button>
+                </div>
+            </div>
+            <div class="review-list" id="review-list"></div>
+        </div>
+    </div>
+
+    <script src="questions_basics.js"></script>
+    <script src="questions_data.js"></script>
+    <script src="questions_arch.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
