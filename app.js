@@ -14,11 +14,15 @@ function init() {
     allQuestions = [
         ...(window.questionsBasics || []),
         ...(window.questionsData || []),
-        ...(window.questionsArch || [])
+        ...(window.questionsArch || []),
+        ...(window.questionsDb || []),
+        ...(window.questionsProg || [])
     ];
     document.getElementById('basics-count').textContent = (window.questionsBasics || []).length + ' Questions';
     document.getElementById('data-count').textContent = (window.questionsData || []).length + ' Questions';
     document.getElementById('arch-count').textContent = (window.questionsArch || []).length + ' Questions';
+    document.getElementById('db-count').textContent = (window.questionsDb || []).length + ' Questions';
+    document.getElementById('prog-count').textContent = (window.questionsProg || []).length + ' Questions';
 }
 
 function showScreen(id) {
@@ -34,20 +38,24 @@ function startQuiz(mode) {
     else if (mode === 'basics') pool = [...(window.questionsBasics || [])];
     else if (mode === 'data') pool = [...(window.questionsData || [])];
     else if (mode === 'architecture') pool = [...(window.questionsArch || [])];
+    else if (mode === 'database') pool = [...(window.questionsDb || [])];
+    else if (mode === 'programming') pool = [...(window.questionsProg || [])];
 
     const shuffle = document.getElementById('shuffle-check').checked;
     timerEnabled = document.getElementById('timer-check').checked;
     let count = parseInt(document.getElementById('question-count-select').value);
     if (count === 0) count = pool.length;
 
-    if (shuffle) pool.sort(() => Math.random() - 0.5);
+    if (shuffle) {
+        pool = smartShuffle(pool);
+    }
     currentQuiz = pool.slice(0, Math.min(count, pool.length));
     currentIndex = 0;
     answers = {};
     correctCount = 0;
     wrongCount = 0;
 
-    const labels = { all: 'Full Test', basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture' };
+    const labels = { all: 'Full Test', basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming' };
     document.getElementById('quiz-topic-label').textContent = labels[mode];
     document.getElementById('total-q').textContent = currentQuiz.length;
     document.getElementById('score-correct').textContent = '✓ 0';
@@ -239,7 +247,7 @@ function finishQuiz() {
 
     // Topic breakdown
     const breakdown = document.getElementById('result-topic-breakdown');
-    const topics = { basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture' };
+    const topics = { basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming' };
     let html = '<h3>Topic Breakdown</h3>';
     for (const [key, label] of Object.entries(topics)) {
         let topicCorrect = 0, topicTotal = 0;
@@ -317,6 +325,38 @@ function filterReview(filter, btn) {
 function goHome() {
     stopTimer();
     showScreen('landing-screen');
+}
+
+// Smart Shuffle: picks evenly from all topics in round-robin order
+function smartShuffle(pool) {
+    // Group by topic
+    const buckets = {};
+    pool.forEach(q => {
+        if (!buckets[q.topic]) buckets[q.topic] = [];
+        buckets[q.topic].push(q);
+    });
+    // Shuffle each bucket independently
+    const topicKeys = Object.keys(buckets);
+    topicKeys.forEach(key => {
+        buckets[key].sort(() => Math.random() - 0.5);
+    });
+    // Round-robin pick from each topic
+    const result = [];
+    let added = true;
+    let round = 0;
+    // Shuffle the topic order itself for variety
+    topicKeys.sort(() => Math.random() - 0.5);
+    while (added) {
+        added = false;
+        for (const key of topicKeys) {
+            if (round < buckets[key].length) {
+                result.push(buckets[key][round]);
+                added = true;
+            }
+        }
+        round++;
+    }
+    return result;
 }
 
 document.addEventListener('DOMContentLoaded', init);

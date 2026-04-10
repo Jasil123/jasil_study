@@ -16,7 +16,7 @@
             <div class="landing-container">
                 <div class="hero-badge">🎓 CS MCQ Master</div>
                 <h1 class="hero-title">Computer Science<br><span class="gradient-text">Quiz Platform</span></h1>
-                <p class="hero-subtitle">1000 carefully crafted MCQs covering Computer Basics, Data Representation & Computer Architecture</p>
+                <p class="hero-subtitle">1000+ carefully crafted MCQs covering Computer Basics, Data Representation, Computer Architecture & Database Fundamentals</p>
                 
                 <div class="stats-row">
                     <div class="stat-card">
@@ -24,7 +24,7 @@
                         <div class="stat-label">Questions</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">3</div>
+                        <div class="stat-number">5</div>
                         <div class="stat-label">Topics</div>
                     </div>
                     <div class="stat-card">
@@ -55,6 +55,16 @@
                             <div class="mode-icon">⚙️</div>
                             <h3>Computer Architecture</h3>
                             <p id="arch-count">0 Questions</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('database')">
+                            <div class="mode-icon">🗄️</div>
+                            <h3>Database Fundamentals</h3>
+                            <p id="db-count">0 Questions</p>
+                        </div>
+                        <div class="mode-card" onclick="startQuiz('programming')">
+                            <div class="mode-icon">💻</div>
+                            <h3>C Programming</h3>
+                            <p id="prog-count">0 Questions</p>
                         </div>
                     </div>
                     <div class="quiz-options">
@@ -182,6 +192,8 @@
     <script src="questions_basics.js"></script>
     <script src="questions_data.js"></script>
     <script src="questions_arch.js"></script>
+    <script src="questions_db.js"></script>
+    <script src="questions_prog.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
