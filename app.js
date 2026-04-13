@@ -11,18 +11,27 @@ let timerValue = 60;
 let currentMode = 'all';
 
 function init() {
+    window.questionsBasics = enrichQuestionSet(window.questionsBasics || []);
+    window.questionsData = enrichQuestionSet(window.questionsData || []);
+    window.questionsArch = enrichQuestionSet(window.questionsArch || []);
+    window.questionsDb = enrichQuestionSet(window.questionsDb || []);
+    window.questionsProg = enrichQuestionSet(window.questionsProg || []);
+    window.questionsEnglish = enrichQuestionSet(window.questionsEnglish || []);
+
     allQuestions = [
         ...(window.questionsBasics || []),
         ...(window.questionsData || []),
         ...(window.questionsArch || []),
         ...(window.questionsDb || []),
-        ...(window.questionsProg || [])
+        ...(window.questionsProg || []),
+        ...(window.questionsEnglish || [])
     ];
     document.getElementById('basics-count').textContent = (window.questionsBasics || []).length + ' Questions';
     document.getElementById('data-count').textContent = (window.questionsData || []).length + ' Questions';
     document.getElementById('arch-count').textContent = (window.questionsArch || []).length + ' Questions';
     document.getElementById('db-count').textContent = (window.questionsDb || []).length + ' Questions';
     document.getElementById('prog-count').textContent = (window.questionsProg || []).length + ' Questions';
+    document.getElementById('eng-count').textContent = (window.questionsEnglish || []).length + ' Questions';
 }
 
 function showScreen(id) {
@@ -40,6 +49,7 @@ function startQuiz(mode) {
     else if (mode === 'architecture') pool = [...(window.questionsArch || [])];
     else if (mode === 'database') pool = [...(window.questionsDb || [])];
     else if (mode === 'programming') pool = [...(window.questionsProg || [])];
+    else if (mode === 'english') pool = [...(window.questionsEnglish || [])];
 
     const shuffle = document.getElementById('shuffle-check').checked;
     timerEnabled = document.getElementById('timer-check').checked;
@@ -55,7 +65,7 @@ function startQuiz(mode) {
     correctCount = 0;
     wrongCount = 0;
 
-    const labels = { all: 'Full Test', basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming' };
+    const labels = { all: 'Full Test', basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming', english: 'English' };
     document.getElementById('quiz-topic-label').textContent = labels[mode];
     document.getElementById('total-q').textContent = currentQuiz.length;
     document.getElementById('score-correct').textContent = '✓ 0';
@@ -91,8 +101,8 @@ function renderQuestion() {
     });
 
     const exp = document.getElementById('explanation');
-    if (answers[currentIndex] !== undefined && q.explanation) {
-        exp.innerHTML = '<strong>Explanation:</strong> ' + q.explanation;
+    if (answers[currentIndex] !== undefined && (q.explanation || q.teacherExplanation)) {
+        exp.innerHTML = buildTeacherFeedbackHtml(q);
         exp.style.display = 'block';
     } else {
         exp.style.display = 'none';
@@ -247,7 +257,7 @@ function finishQuiz() {
 
     // Topic breakdown
     const breakdown = document.getElementById('result-topic-breakdown');
-    const topics = { basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming' };
+    const topics = { basics: 'Computer Basics', data: 'Data Representation', architecture: 'Computer Architecture', database: 'Database Fundamentals', programming: 'C Programming', english: 'English' };
     let html = '<h3>Topic Breakdown</h3>';
     for (const [key, label] of Object.entries(topics)) {
         let topicCorrect = 0, topicTotal = 0;
@@ -309,7 +319,7 @@ function renderReview(filter) {
             else if (j === userAns && !isCorrect) oc = 'ro-wrong';
             html += `<div class="review-opt ${oc}"><span class="ro-letter">${letters[j]}.</span> ${opt}</div>`;
         });
-        if (q.explanation) html += `<div class="explanation" style="display:block;margin-top:12px"><strong>Explanation:</strong> ${q.explanation}</div>`;
+        if (q.explanation || q.teacherExplanation) html += `<div class="explanation" style="display:block;margin-top:12px">${buildTeacherFeedbackHtml(q)}</div>`;
         html += '</div></div>';
     });
     if (!html) html = '<p style="text-align:center;color:var(--text2);padding:40px">No questions in this category.</p>';
@@ -325,6 +335,26 @@ function filterReview(filter, btn) {
 function goHome() {
     stopTimer();
     showScreen('landing-screen');
+}
+
+function enrichQuestionSet(questionSet) {
+    return questionSet;
+}
+
+function buildTeacherFeedbackHtml(q) {
+    return `
+        <div class="teacher-title">Teacher Explanation</div>
+        <div class="teacher-text">${q.explanation || 'No explanation added yet.'}</div>
+    `;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
 }
 
 // Smart Shuffle: picks evenly from all topics in round-robin order
